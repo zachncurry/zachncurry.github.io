@@ -206,7 +206,6 @@
             gap: 8px;
         }
 
-        /* Status Badges */
         .status-badge {
             font-size: 0.75rem;
             padding: 4px 8px;
@@ -251,7 +250,7 @@
             <p>ToDoozie Focus Timer & In-Browser AI Task Breakdown</p>
         </header>
 
-        <!-- ToDoozie Timer Card with Ambient Music Generator -->
+        <!-- ToDoozie Timer Card with Modern Soundscape Generator -->
         <div class="card" style="text-align: center;">
             <div id="timer-mode" style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; color: var(--text-secondary);">Work Session</div>
             <div class="timer-display" id="timer">25:00</div>
@@ -261,16 +260,16 @@
                 <button class="secondary" onclick="switchMode()">Switch Mode</button>
             </div>
 
-            <!-- AI Ambient Music Generator Panel -->
+            <!-- Modern Soundscape Generator Panel -->
             <div class="music-panel">
-                <div style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc; text-align: left;">🎵 AI Procedural Ambient Soundscape</div>
+                <div style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc; text-align: left;">🎵 Modern Lo-Fi & Synth Soundscapes</div>
                 <div class="music-controls-row">
                     <select id="music-style-select" onchange="changeMusicStyle()">
-                        <option value="jazz">🎷 Smooth Jazz (Mellow Chords)</option>
-                        <option value="electric">⚡ Electric Energy (Pulsing Synth)</option>
-                        <option value="focus">🧠 Extreme Focus (Deep Ambient Drone)</option>
+                        <option value="lofi">☕ Lo-Fi Chill Beats (Warm Chords)</option>
+                        <option value="synthwave">🌆 Cyberpunk Synthwave (Arpeggios)</option>
+                        <option value="ambient">🌌 Deep Theta Ambient (Binaural Drone)</option>
                     </select>
-                    <button id="music-toggle-btn" class="secondary" onclick="toggleMusic()">Play Music</button>
+                    <button id="music-toggle-btn" class="secondary" onclick="toggleMusic()">Play Soundscape</button>
                 </div>
             </div>
         </div>
@@ -359,18 +358,32 @@
         }
     </script>
 
-    <!-- Procedural Web Audio Music Engine & App Logic -->
+    <!-- Modern Procedural Web Audio Engine & App Logic -->
     <script>
         let audioCtx = null;
         let isMusicPlaying = false;
         let musicTimer = null;
-        let currentStyle = 'jazz';
+        let currentStyle = 'lofi';
 
-        // Frequencies for scales (Hz)
-        const scales = {
-            jazz: [220.00, 261.63, 293.66, 329.63, 392.00, 440.00], // Smooth jazz pentatonic/minor 7th vibes
-            electric: [146.83, 196.00, 220.00, 293.66, 349.23, 392.00], // Punchy electric synth arpeggios
-            focus: [130.81, 196.00, 261.63, 329.63] // Deep calm ambient drone tones
+        // Rich chord progressions (frequencies in Hz for Lo-Fi minor 9th / 11th chord structures)
+        const chordProgressions = {
+            lofi: [
+                [220.00, 261.63, 329.63, 392.00], // Am9
+                [174.61, 220.00, 261.63, 329.63], // Fmaj7
+                [130.81, 164.81, 196.00, 246.94], // Cmaj7
+                [196.00, 246.94, 293.66, 349.23]  // G6
+            ],
+            synthwave: [
+                [146.83, 220.00, 293.66, 440.00], // Dm root octave
+                [123.47, 185.00, 246.94, 370.00], // Bm
+                [110.00, 164.81, 220.00, 329.63], // Am
+                [130.81, 196.00, 261.63, 392.00]  // C
+            ],
+            ambient: [
+                [103.83, 155.56, 207.65, 311.13], // Ab drone pad
+                [116.54, 174.61, 233.08, 349.23], // Bb drone pad
+                [92.50, 138.59, 185.00, 277.18]   // F# drone pad
+            ]
         };
 
         function toggleMusic() {
@@ -385,15 +398,15 @@
 
             isMusicPlaying = !isMusicPlaying;
             if (isMusicPlaying) {
-                btn.textContent = "Stop Music";
+                btn.textContent = "Stop Soundscape";
                 btn.style.borderColor = "var(--success)";
                 btn.style.color = "var(--success)";
-                startProceduralMusic();
+                startModernSoundEngine();
             } else {
-                btn.textContent = "Play Music";
+                btn.textContent = "Play Soundscape";
                 btn.style.borderColor = "var(--border)";
                 btn.style.color = "var(--text-primary)";
-                stopProceduralMusic();
+                stopModernSoundEngine();
             }
         }
 
@@ -401,61 +414,67 @@
             currentStyle = document.getElementById('music-style-select').value;
         }
 
-        function playTone(freq, type = 'sine', duration = 2) {
+        // Play a lush multi-oscillator polyphonic chord with low-pass filtering and slow smooth envelopes
+        function playChord(frequencies) {
             if (!audioCtx || !isMusicPlaying) return;
 
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const now = audioCtx.currentTime;
+            
+            // Master filter for warm lo-fi atmosphere (removes harsh digital highs)
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(currentStyle === 'synthwave' ? 1800 : 850, now);
 
-            osc.type = type;
-            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            // Master gain to keep overall output safe and balanced
+            const masterGain = audioCtx.createGain();
+            masterGain.gain.setValueAtTime(0, now);
+            masterGain.gain.linearRampToValueAtTime(0.12, now + 0.8); // Smooth attack
+            masterGain.gain.exponentialRampToValueAtTime(0.0001, now + 4.5); // Long gentle release
 
-            // Smooth envelope to avoid clicks
-            gain.gain.setValueAtTime(0, audioCtx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 0.5);
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            filter.connect(masterGain);
+            masterGain.connect(audioCtx.destination);
 
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            // Spawn oscillators for each note in the chord
+            frequencies.forEach((freq, idx) => {
+                const osc = audioCtx.createOscillator();
+                // Use triangle/sine mix for warm vintage synthesizer pad feel
+                osc.type = (currentStyle === 'synthwave' && idx % 2 === 0) ? 'sawtooth' : 'triangle';
+                osc.frequency.setValueAtTime(freq, now);
+                
+                // Slight organic detuning for movement
+                if (idx > 0) {
+                    osc.detune.setValueAtTime((Math.random() - 0.5) * 8, now);
+                }
 
-            osc.start();
-            osc.stop(audioCtx.currentTime + duration);
+                osc.connect(filter);
+                osc.start(now);
+                osc.stop(now + 5.0);
+            });
         }
 
-        function startProceduralMusic() {
-            stopProceduralMusic();
+        function startModernSoundEngine() {
+            stopModernSoundEngine();
 
+            let chordIndex = 0;
             const playLoop = () => {
                 if (!isMusicPlaying) return;
 
-                const notes = scales[currentStyle];
-                const note = notes[Math.floor(Math.random() * notes.length)];
+                const progression = chordProgressions[currentStyle];
+                const currentChord = progression[chordIndex];
                 
-                let waveType = 'sine';
-                let noteDuration = 3;
+                playChord(currentChord);
 
-                if (currentStyle === 'electric') {
-                    waveType = 'square';
-                    noteDuration = 0.8;
-                } else if (currentStyle === 'jazz') {
-                    waveType = 'triangle';
-                    noteDuration = 2.5;
-                } else if (currentStyle === 'focus') {
-                    waveType = 'sine';
-                    noteDuration = 4;
-                }
+                chordIndex = (chordIndex + 1) % progression.length;
 
-                playTone(note, waveType, noteDuration);
-
-                // Schedule next note depending on style pacing
-                const interval = currentStyle === 'electric' ? 600 : (currentStyle === 'jazz' ? 1800 : 3000);
+                // Timing interval depending on mood
+                const interval = currentStyle === 'synthwave' ? 2400 : 4500;
                 musicTimer = setTimeout(playLoop, interval);
             };
 
             playLoop();
         }
 
-        function stopProceduralMusic() {
+        function stopModernSoundEngine() {
             if (musicTimer) {
                 clearTimeout(musicTimer);
                 musicTimer = null;
