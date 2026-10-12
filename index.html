@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusFlow AI - ToDoozie & Task Assistant</title>
+    <title>FocusFlow AI - Pomodoro & Task Assistant</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -13,7 +13,8 @@
             --accent: #6366f1;
             --accent-hover: #4f46e5;
             --border: #334155;
-            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
         }
 
         body {
@@ -56,10 +57,10 @@
             border: 1px solid var(--border);
             border-radius: 16px;
             padding: 24px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* ToDoozie Section */
+        /* Pomodoro Section */
         .timer-display {
             font-size: 4.5rem;
             font-weight: 800;
@@ -144,7 +145,7 @@
             padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .task-main {
@@ -154,14 +155,40 @@
             gap: 10px;
         }
 
-        .task-title {
-            font-weight: 500;
+        .task-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
             flex: 1;
         }
 
+        .task-title {
+            font-weight: 500;
+        }
+
+        .task-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Status Badges / Selectors */
+        .status-badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 600;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .status-not-started { background-color: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: var(--border); }
+        .status-in-progress { background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
+        .status-done { background-color: rgba(16, 185, 129, 0.15); color: var(--success); border-color: rgba(16, 185, 129, 0.3); text-decoration: line-through; }
+
         .subtasks {
             list-style: disc;
-            margin: 6px 0 0 20px;
+            margin: 4px 0 0 20px;
             padding: 0;
             color: var(--text-secondary);
             font-size: 0.85rem;
@@ -188,10 +215,10 @@
     <div class="container">
         <header>
             <h1>FocusFlow AI</h1>
-            <p>ToDoozie Focus Timer & In-Browser AI Task Breakdown</p>
+            <p>Pomodoro Focus Timer & In-Browser AI Task Breakdown</p>
         </header>
 
-        <!-- ToDoozie Timer Card -->
+        <!-- Pomodoro Timer Card -->
         <div class="card" style="text-align: center;">
             <div id="timer-mode" style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; color: var(--text-secondary);">Work Session</div>
             <div class="timer-display" id="timer">25:00</div>
@@ -230,13 +257,11 @@
             statusEl.innerText = text;
         }
 
-        // Lazy load the local AI model on startup
         async function initAI() {
             try {
                 updateStatus("Loading local browser AI model (Gemma-3 270M)... First time takes ~10s.");
-                // Using a lightweight, fast ONNX model designed for browser execution
                 generator = await pipeline('text-generation', 'onnx-community/gemma-3-270m-it-ONNX', {
-                    device: 'webgpu' // Auto falls back to WASM/CPU if WebGPU isn't supported
+                    device: 'webgpu'
                 });
                 updateStatus("✨ Browser AI Ready! Click '🤖 AI Breakdown' on any task.");
                 setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
@@ -247,26 +272,25 @@
             }
         }
 
-initAI();
+        initAI();
 
-        // Expose global AI breakdown function to window scope
-        window.breakdownTaskWithAI = async function(taskId, taskText) {
+        window.breakdownTaskWithAI = async function(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
             const btn = document.getElementById(`btn-${taskId}`);
-            const subtaskContainer = document.getElementById(`subtasks-${taskId}`);
-            
             btn.disabled = true;
             btn.innerText = "Thinking...";
-            updateStatus(`AI is breaking down: "${taskText}"...`);
+            updateStatus(`AI is breaking down: "${task.text}"...`);
 
             let subtasks = [];
 
             try {
                 if (generator) {
-                    const prompt = `Break down this task into 3 short actionable 25-minute ToDoozie steps. Output only a list starting with hyphens:\nTask: ${taskText}\nSteps:\n-`;
+                    const prompt = `Break down this task into 3 short actionable 25-minute Pomodoro steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
                     const output = await generator(prompt, { max_new_tokens: 80, temperature: 0.3 });
                     const generatedText = output[0].generated_text;
                     
-                    // Parse bullet points from text output
                     subtasks = generatedText
                         .split('\n')
                         .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*'))
@@ -274,10 +298,9 @@ initAI();
                         .slice(0, 3);
                 }
                 
-                // Fallback if model output is empty
                 if (subtasks.length === 0) {
                     subtasks = [
-                        `Research and outline requirements for ${taskText}`,
+                        `Research and outline requirements for ${task.text}`,
                         `Execute core implementation block (25 mins)`,
                         `Review, test, and finalize deliverables`
                     ];
@@ -285,26 +308,19 @@ initAI();
             } catch (e) {
                 console.error("Inference error:", e);
                 subtasks = [
-                    `Define scope and initial setup for ${taskText}`,
+                    `Define scope and initial setup`,
                     `Deep work sprint session`,
                     `Final cleanup and review`
                 ];
             }
 
-            // Render subtasks into DOM
-            subtaskContainer.innerHTML = '';
-            subtasks.forEach(st => {
-                const li = document.createElement('li');
-                li.innerText = st;
-                subtaskContainer.appendChild(li);
-            });
-
-            btn.innerText = "Done ✓";
+            task.subtasks = subtasks;
+            saveAndRender();
             statusEl.style.display = 'none';
         }
     </script>
 
-    <!-- ToDoozie & UI Script Logic -->
+    <!-- Pomodoro & App State Logic -->
     <script>
         let timeLeft = 25 * 60;
         let timerId = null;
@@ -315,6 +331,84 @@ initAI();
         const startBtn = document.getElementById('start-btn');
         const timerMode = document.getElementById('timer-mode');
 
+        // Task State & LocalStorage
+        let tasks = JSON.parse(localStorage.getItem('focusflow_tasks')) || [];
+
+        function saveAndRender() {
+            localStorage.setItem('focusflow_tasks', JSON.stringify(tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
+
+            if (tasks.length === 0) {
+                list.innerHTML = `<li style="text-align: center; color: var(--text-secondary); padding: 10px;">No tasks added yet. Add one above!</li>`;
+                return;
+            }
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+
+                // Status configuration mapping
+                const statuses = ['not-started', 'in-progress', 'done'];
+                const statusLabels = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'done': 'Done' };
+
+                li.innerHTML = `
+                    <div class="task-main">
+                        <div class="task-info">
+                            <span class="task-title" style="${task.status === 'done' ? 'text-decoration: line-through; color: var(--text-secondary);' : ''}">${task.text}</span>
+                        </div>
+                        <div class="task-actions">
+                            <span class="status-badge status-${task.status}" onclick="cycleStatus(${task.id})" title="Click to change status">${statusLabels[task.status]}</span>
+                            <button class="secondary" id="btn-${task.id}" onclick="breakdownTaskWithAI(${task.id})">🤖 AI Breakdown</button>
+                            <button class="secondary" onclick="deleteTask(${task.id})" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">×</button>
+                        </div>
+                    </div>
+                    <ul class="subtasks" id="subtasks-${task.id}">
+                        ${(task.subtasks || []).map(st => `<li>${st}</li>`).join('')}
+                    </ul>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        function addTask() {
+            const input = document.getElementById('new-task-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const newTask = {
+                id: Date.now(), // unique timestamp ID
+                text: text,
+                status: 'not-started',
+                subtasks: []
+            };
+
+            tasks.push(newTask);
+            input.value = '';
+            saveAndRender();
+        }
+
+        function cycleStatus(id) {
+            const task = tasks.find(t => t.id === id);
+            if (!task) return;
+
+            if (task.status === 'not-started') task.status = 'in-progress';
+            else if (task.status === 'in-progress') task.status = 'done';
+            else task.status = 'not-started';
+
+            saveAndRender();
+        }
+
+        function deleteTask(id) {
+            tasks = tasks.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        // Timer Logic
         function updateTimerDisplay() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
@@ -335,7 +429,7 @@ initAI();
                         updateTimerDisplay();
                     } else {
                         clearInterval(timerId);
-                        alert(isWorkSession ? "ToDoozie session complete! Take a break." : "Break over! Time to focus.");
+                        alert(isWorkSession ? "Pomodoro session complete! Take a break." : "Break over! Time to focus.");
                         switchMode();
                     }
                 }, 1000);
@@ -361,35 +455,13 @@ initAI();
             updateTimerDisplay();
         }
 
-        let taskIdCounter = 0;
-        function addTask() {
-            const input = document.getElementById('new-task-input');
-            const text = input.value.trim();
-            if (!text) return;
-
-            const id = taskIdCounter++;
-            const list = document.getElementById('task-list');
-
-            const li = document.createElement('li');
-            li.className = 'task-item';
-            li.innerHTML = `
-                <div class="task-main">
-                    <span class="task-title">${text}</span>
-                    <button class="secondary" id="btn-${id}" onclick="breakdownTaskWithAI(${id}, '${text.replace(/'/g, "\\'")}')">🤖 AI Breakdown</button>
-                </div>
-                <ul class="subtasks" id="subtasks-${id}"></ul>
-            `;
-
-            list.appendChild(li);
-            input.value = '';
-        }
-
-        // Allow pressing 'Enter' to add tasks
         document.getElementById('new-task-input').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') addTask();
         });
 
+        // Initial paint on load
         updateTimerDisplay();
+        renderTasks();
     </script>
 </body>
 </html>
