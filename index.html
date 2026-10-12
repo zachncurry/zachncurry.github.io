@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusFlow AI - Pomodoro & Task Assistant</title>
+    <title>FocusFlow AI - ToDoozie & Task Assistant</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -60,7 +60,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* Pomodoro Section */
+        /* ToDoozie Section */
         .timer-display {
             font-size: 4.5rem;
             font-weight: 800;
@@ -215,10 +215,10 @@
     <div class="container">
         <header>
             <h1>FocusFlow AI</h1>
-            <p>Pomodoro Focus Timer & In-Browser AI Task Breakdown</p>
+            <p>ToDoozie Focus Timer & In-Browser AI Task Breakdown</p>
         </header>
 
-        <!-- Pomodoro Timer Card -->
+        <!-- ToDoozie Timer Card -->
         <div class="card" style="text-align: center;">
             <div id="timer-mode" style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; color: var(--text-secondary);">Work Session</div>
             <div class="timer-display" id="timer">25:00</div>
@@ -287,7 +287,7 @@
 
             try {
                 if (generator) {
-                    const prompt = `Break down this task into 3 short actionable 25-minute Pomodoro steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
+                    const prompt = `Break down this task into 3 short actionable 25-minute ToDoozie steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
                     const output = await generator(prompt, { max_new_tokens: 80, temperature: 0.3 });
                     const generatedText = output[0].generated_text;
                     
@@ -320,7 +320,7 @@
         }
     </script>
 
-    <!-- Pomodoro & App State Logic -->
+    <!-- ToDoozie & App State Logic -->
     <script>
         let timeLeft = 25 * 60;
         let timerId = null;
@@ -429,7 +429,7 @@
                         updateTimerDisplay();
                     } else {
                         clearInterval(timerId);
-                        alert(isWorkSession ? "Pomodoro session complete! Take a break." : "Break over! Time to focus.");
+                        alert(isWorkSession ? "ToDoozie session complete! Take a break." : "Break over! Time to focus.");
                         switchMode();
                     }
                 }, 1000);
