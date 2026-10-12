@@ -1,6 +1,6 @@
-# ⚡ FocusFlow AI — In-Browser Smart ToDoozie Assistant
+# ⚡ FocusFlow AI — In-Browser Smart Pomodoro Assistant
 
-> *A privacy-first, serverless productivity tool powered by client-side WebGPU AI.*
+> *A privacy-first, serverless productivity tool powered by client-side WebGPU AI and procedural Web Audio.*
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Tech Stack](https://img.shields.io/badge/tech-HTML5%20%7C%20CSS3%20%7C%20JS%20%7C%20Transformers.js-orange)
@@ -8,36 +8,39 @@
 
 ---
 
-## 💡 The Vision: Lightweight, Frictionless AI
+## 💡 The Vision: Lightweight, Frictionless AI & Soundscapes
 
 For a long time, I wanted to explore a simple question:  
 **"Can we build useful, modern AI tools that run 100% inside the user's browser without complex backends, heavy cloud infrastructure, or expensive API keys?"**
 
-Most AI features today rely on server-side APIs, requiring users to log in, supply API keys, or deal with server latency and data privacy concerns. 
+Most productivity and AI tools rely on server-side APIs, requiring users to log in, supply API keys, or deal with server latency and data privacy concerns.
 
-**FocusFlow AI** is my answer to that challenge. It combines a classic **ToDoozie focus timer** with an **in-browser LLM** (via `@huggingface/transformers` and ONNX runtime) to automatically break down large, daunting tasks into actionable, 25-minute ToDoozie steps.
+**FocusFlow AI** is my answer to that challenge. It combines a classic **Pomodoro focus timer**, an **in-browser LLM** (via `@huggingface/transformers` and ONNX runtime), a **procedural Web Audio sound engine**, and **local persistent state**—all packed into a zero-backend static Web app.
 
 ---
 
 ## ✨ Features
 
-- ⏱️ **ToDoozie Focus Engine:** Customizable Work/Break intervals with simple control toggles.
-- 🤖 **In-Browser AI Task Breakdown:** Uses **Gemma-3 270M (ONNX)** running locally to decompose tasks into actionable sub-steps.
-- 🔒 **100% Local & Private:** Your task list and prompts never leave your device. Zero server calls, zero telemetry.
+- ⏱️ **Pomodoro Focus Engine:** Customizable Work/Break intervals with simple control toggles.
+- 🤖 **In-Browser AI Task Breakdown:** Uses **Gemma-3 270M (ONNX)** running locally to decompose major goals into actionable, 25-minute Pomodoro steps.
+- 🎵 **Procedural AI Soundscapes:** Real-time, algorithmic ambient audio generated entirely via the Web Audio API (no external MP3 downloads required). Choose between:
+  - 🎷 **Smooth Jazz:** Mellow chord progressions with warm triangle waves.
+  - ⚡ **Electric Energy:** Punchy, fast-paced synth loops to energize rapid sprints.
+  - 🧠 **Extreme Focus:** Deep ambient drones designed for distraction-free deep work.
+- 📊 **Dynamic Task Status Management:** Cycle tasks between **Not Started**, **In Progress**, and **Done** with visual badges.
+- 💾 **LocalStorage Persistence:** Saves your task list, subtasks, and progress automatically across browser sessions.
+- 🔒 **100% Local & Private:** Your task list, prompts, and audio generation never leave your device. Zero server calls, zero telemetry.
 - ⚡ **WebGPU / WASM Accelerated:** High-performance local inference directly through your browser graphics card.
-- 💸 **$0 Cost to Host:** Single-file architecture natively hosted on GitHub Pages.
+- 💸 **$0 Cost to Host:** Single-file static architecture natively hosted on GitHub Pages.
 
 ---
 
 ## 🛠️ How It Works Under the Hood
-
-<img width="678" height="367" alt="image" src="https://github.com/user-attachments/assets/6e19fe62-af37-444f-a382-6b9a2f42a7c3" />
-
-
-
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/4db65002-9365-4e75-8318-9620461d1994" />
 1. **No Backend Required:** The app is written in plain HTML, CSS, and modern JavaScript.
 2. **Model Caching:** On first load, the lightweight quantized model (~270M parameters) is cached locally in the browser (`IndexedDB`), allowing instant execution on subsequent visits.
-3. **Hardware Acceleration:** Uses **WebGPU** when available, automatically falling back to CPU WebAssembly (WASM).
+3. **Zero Audio File Overhead:** Instead of streaming heavy MP3 files, ambient soundscapes are synthesized mathematically in real time using the browser's native `AudioContext` oscillators and gain nodes.
+4. **Hardware Acceleration:** Uses **WebGPU** when available, automatically falling back to CPU WebAssembly (WASM).
 
 ---
 
@@ -54,9 +57,6 @@ No `npm install` or node server setup needed!
    ```bash
    git clone [https://github.com/](https://github.com/)<your-username>/<your-repo-name>.git
 
-
-
-
 ## 📊 Tech Stack
 Frontend: Vanilla HTML5, CSS3, JavaScript (ES6 Modules)
 
@@ -64,13 +64,17 @@ AI Runtime: @huggingface/transformers v3
 
 Model: onnx-community/gemma-3-270m-it-ONNX
 
+Audio Engine: Web Audio API (Synthesized Oscillators)
+
+Persistence: HTML5 localStorage API
+
 Hosting: GitHub Pages
 
 ## 🔮 Future Roadmap
-[ ] LocalStorage persistence for completed tasks & streaks
+[ ] Custom soundscape tempo and frequency controls
+[ ] Export task lists & session summaries to Markdown
 [ ] Customizable model selection (e.g., Qwen / SmolLM variants)
-[ ] Web Audio synthesized ambient noise generator (Lo-Fi / White Noise)
-[ ] Mobile PWA offline mode integration
+[ ] Offline PWA (Progressive Web App) manifest and service worker integration
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
