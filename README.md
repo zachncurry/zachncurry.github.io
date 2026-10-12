@@ -1,4 +1,4 @@
-# ⚡ FocusFlow AI — In-Browser Smart ToDoozie Assistant
+# ⚡ FocusFlow AI: In-Browser Smart ToDoozie Assistant
 
 > *A privacy-first, serverless productivity tool powered by client-side WebGPU AI and procedural Web Audio.*
 
