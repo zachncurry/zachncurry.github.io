@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusFlow AI - Task-Based ToDoozie Assistant</title>
+    <title>ToDoozie AI - Task-Based Focus Assistant & Documentation</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -25,9 +25,53 @@
             margin: 0;
             padding: 20px;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
             position: relative;
+        }
+
+        /* Top Navigation Bar */
+        .top-navbar {
+            width: 100%;
+            max-width: 650px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .brand-logo {
+            font-weight: 700;
+            color: #818cf8;
+            font-size: 1.1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background-color: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-secondary);
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .nav-btn.active, .nav-btn:hover {
+            background-color: var(--accent);
+            border-color: var(--accent);
+            color: white;
         }
 
         /* Floating Spotify Widget in Upper Right Corner */
@@ -72,7 +116,6 @@
             display: flex;
             flex-direction: column;
             gap: 24px;
-            margin-top: 10px;
         }
 
         header {
@@ -252,6 +295,16 @@
             display: none;
         }
 
+        /* Documentation Page Styles */
+        .doc-content h2 { color: #818cf8; font-size: 1.4rem; margin-top: 24px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .doc-content h3 { color: #a5b4fc; font-size: 1.1rem; margin-top: 18px; }
+        .doc-content p, .doc-content li { color: var(--text-secondary); line-height: 1.6; font-size: 0.95rem; }
+        .doc-content code { background-color: rgba(15, 23, 42, 0.8); padding: 2px 6px; border-radius: 4px; font-family: monospace; color: #818cf8; }
+        .doc-content pre { background-color: rgba(15, 23, 42, 0.9); padding: 14px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; }
+        .doc-content pre code { background-color: transparent; padding: 0; color: #f8fafc; }
+
+        .hidden { display: none !important; }
+
         /* Mobile Layout Adjustments */
         @media (max-width: 950px) {
             .spotify-floating-widget {
@@ -262,7 +315,6 @@
                 margin-bottom: 20px;
             }
             body {
-                flex-direction: column;
                 align-items: center;
             }
         }
@@ -283,9 +335,19 @@
         </iframe>
     </div>
 
-    <div class="container">
+    <!-- Top Navigation Bar -->
+    <nav class="top-navbar">
+        <div class="brand-logo">⚡ ToDoozie AI built with ❤️ using Google ✨ Gemini assembled by Zach Curry</div>
+        <div class="nav-links">
+            <button class="nav-btn active" id="nav-app-btn" onclick="switchView('app')">Focus App</button>
+            <button class="nav-btn" id="nav-doc-btn" onclick="switchView('doc')">Documentation</button>
+        </div>
+    </nav>
+
+    <!-- App View Container -->
+    <div class="container" id="view-app">
         <header>
-            <h1>FocusFlow AI</h1>
+            <h1>ToDoozie AI</h1>
             <p>Task-Associated ToDoozie Timers & Local AI Breakdown</p>
         </header>
 
@@ -305,6 +367,51 @@
         <div class="card">
             <h3 style="margin-top: 0; margin-bottom: 14px; font-size: 1.1rem;">Your Active Tasks</h3>
             <ul class="task-list" id="task-list"></ul>
+        </div>
+    </div>
+
+    <!-- Documentation View Container -->
+    <div class="container hidden" id="view-doc">
+        <div class="card doc-content">
+            <h2 style="margin-top: 0;">⚡ ToDoozie AI — In-Browser Smart Task & Focus Assistant</h2>
+            <p><em>A privacy-first productivity dashboard with task-bound ToDoozie timers, local WebGPU AI breakdowns, and an integrated Spotify player.</em></p>
+
+            <h2>💡 The Vision: Lightweight, Frictionless AI & Focus Tools</h2>
+            <p><strong>ToDoozie AI</strong> explores a simple question: <br><strong>"Can we build useful, modern productivity tools with local AI that run 100% inside the browser without backend servers, subscription costs, or exposed API keys?"</strong></p>
+
+            <h2>✨ Key Features</h2>
+            <ul>
+                <li>⏱️ <strong>Task-Associated ToDoozie Timers:</strong> Each task features its own dedicated 25-minute countdown timer. Starting a timer automatically shifts task status to <em>In Progress</em> and auto-completes it upon session finish.</li>
+                <li>🤖 <strong>In-Browser AI Task Breakdown:</strong> Uses <strong>Gemma-3 270M (ONNX)</strong> running locally to decompose complex, daunting tasks into 3 actionable 25-minute steps.</li>
+                <li>🎵 <strong>Floating Spotify Focus Widget:</strong> Fixed in the upper-right corner for quick access to curated lo-fi and focus playlists while working.</li>
+                <li>📊 <strong>Three-State Task Lifecycle:</strong> Track progress across <strong>Not Started</strong>, <strong>In Progress</strong>, and <strong>Done</strong> with clickable status badges.</li>
+                <li>💾 <strong>LocalStorage Persistence:</strong> All tasks, active subtasks, and remaining timer states persist automatically across browser refreshes.</li>
+                <li>🔒 <strong>100% Local & Private:</strong> Prompts and task data never leave your browser. Zero backend telemetry, zero API key requirements.</li>
+                <li>⚡ <strong>WebGPU / WASM Accelerated:</strong> High-performance local AI execution powered by your browser's graphics processing or WASM fallback.</li>
+            </ul>
+
+            <h2>🛠️ How It Works Under the Hood</h2>
+            <pre><code>┌─────────────────────────────────────────────────────────────┐
+│                    User Browser Session                     │
+│                                                             │
+│   [ Task Input ] ──────────────► [ LocalStorage Persistence ] │
+│                                           │                 │
+│                                           ▼                 │
+│   [ Spotify Widget ]             [ Task Manager ]           │
+│   (Upper-Right Corner)                    │                 │
+│                                           ├────────► [ Timer]
+│                                           ▼                 │
+│                              [ Transformers.js Pipeline ]   │
+│                                           │                 │
+│                                           ▼                 │
+│                              [ Gemma-3 270M (WebGPU/WASM) ] │
+└─────────────────────────────────────────────────────────────┘</code></pre>
+
+            <h2>🚀 Quickstart</h2>
+            <p>No <code>npm install</code>, Node.js server, or build step required! Open <code>index.html</code> in any modern web browser.</p>
+
+            <h2>📄 License</h2>
+            <p>Distributed under the MIT License.</p>
         </div>
     </div>
 
@@ -387,14 +494,33 @@
         }
     </script>
 
-    <!-- Task-Associated ToDoozie Logic & State Persistence -->
+    <!-- Task-Associated ToDoozie Logic & View Switcher -->
     <script>
-        window.tasks = JSON.parse(localStorage.getItem('focusflow_tasks')) || [];
+        window.tasks = JSON.parse(localStorage.getItem('toodoozie_tasks')) || [];
         let activeTimerInterval = null;
         let activeTaskId = null;
 
+        window.switchView = function(view) {
+            const appView = document.getElementById('view-app');
+            const docView = document.getElementById('view-doc');
+            const appBtn = document.getElementById('nav-app-btn');
+            const docBtn = document.getElementById('nav-doc-btn');
+
+            if (view === 'app') {
+                appView.classList.remove('hidden');
+                docView.classList.add('hidden');
+                appBtn.classList.add('active');
+                docBtn.classList.remove('active');
+            } else {
+                appView.classList.add('hidden');
+                docView.classList.remove('hidden');
+                docBtn.classList.add('active');
+                appBtn.classList.remove('active');
+            }
+        }
+
         function saveAndRender() {
-            localStorage.setItem('focusflow_tasks', JSON.stringify(window.tasks));
+            localStorage.setItem('toodoozie_tasks', JSON.stringify(window.tasks));
             renderTasks();
         }
 
@@ -418,7 +544,6 @@
                 li.className = `task-item ${task.id === activeTaskId ? 'active-timer-card' : ''}`;
                 const statusLabels = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'done': 'Done' };
 
-                // Ensure task timer defaults to 25 mins (1500 secs)
                 if (task.timeLeft === undefined) task.timeLeft = 25 * 60;
 
                 li.innerHTML = `
@@ -470,13 +595,11 @@
             const task = window.tasks.find(t => t.id === id);
             if (!task) return;
 
-            // If another task was running, stop it
             if (activeTaskId && activeTaskId !== id) {
                 clearInterval(activeTimerInterval);
                 activeTimerInterval = null;
             }
 
-            // Toggle pause if clicking the active running task
             if (activeTaskId === id) {
                 clearInterval(activeTimerInterval);
                 activeTimerInterval = null;
@@ -485,7 +608,6 @@
                 return;
             }
 
-            // Start countdown timer for selected task
             activeTaskId = id;
             if (task.status === 'not-started') task.status = 'in-progress';
 
@@ -499,7 +621,7 @@
                     activeTimerInterval = null;
                     activeTaskId = null;
                     task.status = 'done';
-                    alert(`🎉 ToDoozie complete for "${task.text}"! Take a break.`);
+                    alert(`🎉 ToDoozie session complete for "${task.text}"! Take a break.`);
                     saveAndRender();
                 }
             }, 1000);
