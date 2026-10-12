@@ -45,14 +45,14 @@ Most AI utilities rely on heavy cloud APIs or server infrastructure. **ToDoozAI*
 
 ### 1. View Live
 Try the live app on GitHub Pages:  
-👉 **`https://<your-username>.github.io/<your-repo-name>/`**
+👉 **https://zachncurry.github.io/**
 
 ### 2. Run Locally
 No `npm install`, Node.js server, or build step required!
 
 1. Clone the repository:
    ```bash
-   git clone [https://github.com/](https://github.com/)<your-username>/<your-repo-name>.git
+   git clone [https://github.com/](https://github.com/)<zachncurry>/<zachncurry.github.io>.git
 
 
 ## 📊 Tech Stack
