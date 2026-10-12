@@ -1,4 +1,4 @@
-# ⚡ FocusFlow AI: In-Browser Smart Task & Focus Assistant
+# ⚡ ToDoozAI: In-Browser Smart Task & Focus Assistant
 
 > *A privacy-first productivity dashboard with task-bound ToDoozie timers, local WebGPU AI breakdowns, and an integrated Spotify player.*
 
@@ -10,10 +10,10 @@
 
 ## 💡 The Vision: Lightweight, Frictionless AI & Focus Tools
 
-**FocusFlow AI** explores a simple question:  
+**ToDoozAI** explores a simple question:  
 **"Can we build useful, modern productivity tools with local AI that run 100% inside the browser without backend servers, subscription costs, or exposed API keys?"**
 
-Most AI utilities rely on heavy cloud APIs or server infrastructure. **FocusFlow AI** shifts everything to the client side. By pairing **Task-Bound ToDoozie Timers**, an **in-browser LLM** (`@huggingface/transformers`), **LocalStorage persistence**, and an **embedded Spotify Focus widget**, it offers a complete focus workspace hosted directly on GitHub Pages for $0.
+Most AI utilities rely on heavy cloud APIs or server infrastructure. **ToDoozAI** shifts everything to the client side. By pairing **Task-Bound ToDoozie Timers**, an **in-browser LLM** (`@huggingface/transformers`), **LocalStorage persistence**, and an **embedded Spotify Focus widget**, it offers a complete focus workspace hosted directly on GitHub Pages for $0.
 
 ---
 
@@ -64,7 +64,7 @@ Persistence: HTML5 localStorage & IndexedDB
 Hosting: GitHub Pages
 
 ## 🔮 Future Roadmap
-[ ] Custom ToDoozie duration sliders per task
+[ ] Custom ToDoozAI duration sliders per task
 [ ] Drag-and-drop task reordering
 [ ] Export completed tasks & session logs to Markdown/CSV
 [ ] Custom Spotify playlist URL input in widget settings
