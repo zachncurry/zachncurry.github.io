@@ -31,7 +31,8 @@ Most AI utilities rely on heavy cloud APIs or server infrastructure. **FocusFlow
 ---
 
 ## 🛠️ How It Works Under the Hood
-<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/961abba2-7cf1-4043-8854-8c4ecf2bc168" />
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/0ac6b0b3-14b1-4174-8ad6-abc31ad3c3d8" />
+
 
 
 1. **Client-Side Architecture:** The entire app runs out of a single `index.html` file using standard web APIs and CDN-loaded ES modules.
