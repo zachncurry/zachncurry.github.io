@@ -348,7 +348,7 @@
     <div class="container" id="view-app">
         <header>
             <h1>ToDoozAI</h1>
-            <p>Task-Associated ToDoozie Timers & Local AI Breakdown</p>
+            <p>Task-Associated ToDoozAI Timers & Local AI Breakdown</p>
         </header>
 
         <!-- Task Input Card -->
@@ -374,7 +374,7 @@
     <div class="container hidden" id="view-doc">
         <div class="card doc-content">
             <h2 style="margin-top: 0;">⚡ ToDoozAI: In-Browser Smart Task & Focus Assistant</h2>
-            <p><em>A privacy-first productivity dashboard with task-bound ToDoozie timers, local WebGPU AI breakdowns, and an integrated Spotify player.</em></p>
+            <p><em>A privacy-first productivity dashboard with task-bound ToDoozAI timers, local WebGPU AI breakdowns, and an integrated Spotify player.</em></p>
 
             <h2>💡 The Vision: Lightweight, Frictionless AI & Focus Tools</h2>
             <h2>Built with ❤️ using Google ✨ Gemini assembled by Zach Curry</h2>
@@ -382,7 +382,7 @@
 
             <h2>✨ Key Features</h2>
             <ul>
-                <li>⏱️ <strong>Task-Associated ToDoozie Timers:</strong> Each task features its own dedicated 25-minute countdown timer. Starting a timer automatically shifts task status to <em>In Progress</em> and auto-completes it upon session finish.</li>
+                <li>⏱️ <strong>Task-Associated ToDoozAI Timers:</strong> Each task features its own dedicated 25-minute countdown timer. Starting a timer automatically shifts task status to <em>In Progress</em> and auto-completes it upon session finish.</li>
                 <li>🤖 <strong>In-Browser AI Task Breakdown:</strong> Uses <strong>Gemma-3 270M (ONNX)</strong> running locally to decompose complex, daunting tasks into 3 actionable 25-minute steps.</li>
                 <li>🎵 <strong>Floating Spotify Focus Widget:</strong> Fixed in the upper-right corner for quick access to curated lo-fi and focus playlists while working.</li>
                 <li>📊 <strong>Three-State Task Lifecycle:</strong> Track progress across <strong>Not Started</strong>, <strong>In Progress</strong>, and <strong>Done</strong> with clickable status badges.</li>
@@ -466,7 +466,7 @@
             let subtasks = [];
             try {
                 if (generator) {
-                    const prompt = `Break down this task into 3 short actionable 25-minute ToDoozie steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
+                    const prompt = `Break down this task into 3 short actionable 25-minute ToDoozAI steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
                     const output = await generator(prompt, { max_new_tokens: 80, temperature: 0.3 });
                     const generatedText = output[0].generated_text;
                     
@@ -495,7 +495,7 @@
         }
     </script>
 
-    <!-- Task-Associated ToDoozie Logic & View Switcher -->
+    <!-- Task-Associated ToDoozAI Logic & View Switcher -->
     <script>
         window.tasks = JSON.parse(localStorage.getItem('toodoozie_tasks')) || [];
         let activeTimerInterval = null;
@@ -622,7 +622,7 @@
                     activeTimerInterval = null;
                     activeTaskId = null;
                     task.status = 'done';
-                    alert(`🎉 ToDoozie session complete for "${task.text}"! Take a break.`);
+                    alert(`🎉 ToDoozAI session complete for "${task.text}"! Take a break.`);
                     saveAndRender();
                 }
             }, 1000);
