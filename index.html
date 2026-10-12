@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FocusFlow AI - ToDoozie & Task Assistant</title>
+    <title>FocusFlow AI - Task-Based ToDoozie Assistant</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -15,6 +15,7 @@
             --border: #334155;
             --success: #10b981;
             --warning: #f59e0b;
+            --danger: #ef4444;
         }
 
         body {
@@ -29,7 +30,7 @@
             position: relative;
         }
 
-        /* Floating Spotify Widget in Upper Right */
+        /* Floating Spotify Widget in Upper Right Corner */
         .spotify-floating-widget {
             position: fixed;
             top: 20px;
@@ -61,7 +62,7 @@
         .spotify-floating-widget iframe {
             border-radius: 10px;
             width: 100%;
-            height: 152px; /* Compact Spotify embed height */
+            height: 152px;
             border: none;
         }
 
@@ -98,29 +99,33 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
         }
 
-        /* ToDoozie Section */
-        .timer-display {
-            font-size: 4.5rem;
-            font-weight: 800;
-            text-align: center;
-            letter-spacing: -2px;
-            margin: 10px 0;
-            font-variant-numeric: tabular-nums;
+        /* Task Creation Form */
+        .task-input-group {
+            display: flex;
+            gap: 10px;
         }
 
-        .timer-controls {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 16px;
+        input[type="text"] {
+            flex: 1;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--accent);
         }
 
         button {
             background-color: var(--accent);
             color: white;
             border: none;
-            padding: 10px 20px;
-            font-size: 0.95rem;
+            padding: 8px 16px;
+            font-size: 0.9rem;
             font-weight: 600;
             border-radius: 8px;
             cursor: pointer;
@@ -145,69 +150,48 @@
             background-color: var(--border);
         }
 
-        /* Tasks Section */
-        .task-input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+        button.timer-btn-active {
+            background-color: var(--warning);
+            color: #000;
         }
 
-        input[type="text"] {
-            flex: 1;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 14px;
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-
+        /* Task Cards List */
         .task-list {
             list-style: none;
             padding: 0;
             margin: 0;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
 
         .task-item {
             background-color: var(--bg-color);
             border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 14px;
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            transition: border-color 0.2s;
         }
 
-        .task-main {
+        .task-item.active-timer-card {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+        }
+
+        .task-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 10px;
         }
 
-        .task-info {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex: 1;
-        }
-
         .task-title {
-            font-weight: 500;
-        }
-
-        .task-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 600;
+            font-size: 1.05rem;
+            flex: 1;
         }
 
         .status-badge {
@@ -222,6 +206,29 @@
         .status-not-started { background-color: rgba(148, 163, 184, 0.1); color: var(--text-secondary); border-color: var(--border); }
         .status-in-progress { background-color: rgba(245, 158, 11, 0.15); color: var(--warning); border-color: rgba(245, 158, 11, 0.3); }
         .status-done { background-color: rgba(16, 185, 129, 0.15); color: var(--success); border-color: rgba(16, 185, 129, 0.3); text-decoration: line-through; }
+
+        /* Integrated Task Timer Widget */
+        .task-timer-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: rgba(30, 41, 59, 0.6);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 8px 12px;
+        }
+
+        .timer-time {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            color: #818cf8;
+        }
+
+        .timer-controls-group {
+            display: flex;
+            gap: 6px;
+        }
 
         .subtasks {
             list-style: disc;
@@ -245,7 +252,7 @@
             display: none;
         }
 
-        /* Responsive layout adjustment for smaller screens */
+        /* Mobile Layout Adjustments */
         @media (max-width: 950px) {
             .spotify-floating-widget {
                 position: relative;
@@ -263,12 +270,11 @@
 </head>
 <body>
 
-    <!-- Floating Spotify Widget in Upper Right Corner -->
+    <!-- Floating Spotify Widget -->
     <div class="spotify-floating-widget">
         <div class="spotify-header">
             <span>💚 Focus Playlist</span>
         </div>
-        <!-- Embedded Spotify Playlist (Lo-Fi Beats default) -->
         <iframe src="https://open.spotify.com/embed/playlist/0vvXsWCC9xrXsKd4FyS8kM?utm_source=generator&theme=0" 
                 frameBorder="0" 
                 allowfullscreen="" 
@@ -280,35 +286,29 @@
     <div class="container">
         <header>
             <h1>FocusFlow AI</h1>
-            <p>ToDoozie Focus Timer & In-Browser AI Task Breakdown</p>
+            <p>Task-Associated ToDoozie Timers & Local AI Breakdown</p>
         </header>
 
-        <!-- ToDoozie Timer Card -->
-        <div class="card" style="text-align: center;">
-            <div id="timer-mode" style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; color: var(--text-secondary);">Work Session</div>
-            <div class="timer-display" id="timer">25:00</div>
-            <div class="timer-controls">
-                <button id="start-btn" onclick="toggleTimer()">Start</button>
-                <button class="secondary" onclick="resetTimer()">Reset</button>
-                <button class="secondary" onclick="switchMode()">Switch Mode</button>
+        <!-- Task Input Card -->
+        <div class="card">
+            <h3 style="margin-top: 0; margin-bottom: 14px; font-size: 1.1rem;">Add New Focus Goal</h3>
+            <div class="task-input-group">
+                <input type="text" id="new-task-input" placeholder="Enter a major task (e.g., Draft Q4 Marketing Pitch)...">
+                <button onclick="addTask()">Add Task</button>
             </div>
         </div>
 
         <!-- AI Status banner -->
         <div id="ai-status">Initializing local AI model...</div>
 
-        <!-- Tasks Card -->
+        <!-- Dynamic Task Cards with Built-in Timers -->
         <div class="card">
-            <h3 style="margin-top: 0; margin-bottom: 14px; font-size: 1.1rem;">Smart Task List</h3>
-            <div class="task-input-group">
-                <input type="text" id="new-task-input" placeholder="Enter a major task (e.g., Build landing page)...">
-                <button onclick="addTask()">Add Task</button>
-            </div>
+            <h3 style="margin-top: 0; margin-bottom: 14px; font-size: 1.1rem;">Your Active Tasks</h3>
             <ul class="task-list" id="task-list"></ul>
         </div>
     </div>
 
-    <!-- Transformers.js Script Module -->
+    <!-- Transformers.js AI Module -->
     <script type="module">
         import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2';
 
@@ -350,7 +350,7 @@
             const task = window.tasks.find(t => t.id === taskId);
             if (!task) return;
 
-            const btn = document.getElementById(`btn-${taskId}`);
+            const btn = document.getElementById(`ai-btn-${taskId}`);
             btn.disabled = true;
             btn.innerText = "Thinking...";
             updateStatus(`AI is breaking down: "${task.text}"...`);
@@ -358,4 +358,194 @@
             let subtasks = [];
             try {
                 if (generator) {
-                    const prompt = `Break down this task into 3 short
+                    const prompt = `Break down this task into 3 short actionable 25-minute ToDoozie steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
+                    const output = await generator(prompt, { max_new_tokens: 80, temperature: 0.3 });
+                    const generatedText = output[0].generated_text;
+                    
+                    subtasks = generatedText
+                        .split('\n')
+                        .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*'))
+                        .map(line => line.replace(/^[-*]\s*/, '').trim())
+                        .slice(0, 3);
+                }
+                
+                if (subtasks.length === 0) {
+                    subtasks = [
+                        `Research and outline requirements for ${task.text}`,
+                        `Execute core implementation block (25 mins)`,
+                        `Review, test, and finalize deliverables`
+                    ];
+                }
+            } catch (e) {
+                console.error("Inference error:", e);
+                subtasks = [`Define scope and initial setup`, `Deep work sprint session`, `Final cleanup and review`];
+            }
+
+            task.subtasks = subtasks;
+            saveAndRender();
+            statusEl.style.display = 'none';
+        }
+    </script>
+
+    <!-- Task-Associated ToDoozie Logic & State Persistence -->
+    <script>
+        window.tasks = JSON.parse(localStorage.getItem('focusflow_tasks')) || [];
+        let activeTimerInterval = null;
+        let activeTaskId = null;
+
+        function saveAndRender() {
+            localStorage.setItem('focusflow_tasks', JSON.stringify(window.tasks));
+            renderTasks();
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
+
+            if (window.tasks.length === 0) {
+                list.innerHTML = `<li style="text-align: center; color: var(--text-secondary); padding: 10px;">No active tasks. Add one above to get started!</li>`;
+                return;
+            }
+
+            window.tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.id === activeTaskId ? 'active-timer-card' : ''}`;
+                const statusLabels = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'done': 'Done' };
+
+                // Ensure task timer defaults to 25 mins (1500 secs)
+                if (task.timeLeft === undefined) task.timeLeft = 25 * 60;
+
+                li.innerHTML = `
+                    <div class="task-header">
+                        <span class="task-title" style="${task.status === 'done' ? 'text-decoration: line-through; color: var(--text-secondary);' : ''}">${task.text}</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span class="status-badge status-${task.status}" onclick="cycleStatus(${task.id})" title="Click to change status">${statusLabels[task.status]}</span>
+                            <button class="secondary" id="ai-btn-${task.id}" onclick="breakdownTaskWithAI(${task.id})">🤖 AI Breakdown</button>
+                            <button class="secondary" onclick="deleteTask(${task.id})" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">×</button>
+                        </div>
+                    </div>
+
+                    <!-- Individual Task Timer Row -->
+                    <div class="task-timer-bar">
+                        <div class="timer-time" id="timer-display-${task.id}">${formatTime(task.timeLeft)}</div>
+                        <div class="timer-controls-group">
+                            <button id="timer-btn-${task.id}" class="${task.id === activeTaskId ? 'timer-btn-active' : 'secondary'}" onclick="toggleTaskTimer(${task.id})">
+                                ${task.id === activeTaskId ? 'Pause' : 'Start Focus'}
+                            </button>
+                            <button class="secondary" onclick="resetTaskTimer(${task.id})">Reset</button>
+                        </div>
+                    </div>
+
+                    <ul class="subtasks" id="subtasks-${task.id}">
+                        ${(task.subtasks || []).map(st => `<li>${st}</li>`).join('')}
+                    </ul>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        window.addTask = function() {
+            const input = document.getElementById('new-task-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            window.tasks.push({
+                id: Date.now(),
+                text: text,
+                status: 'not-started',
+                timeLeft: 25 * 60,
+                subtasks: []
+            });
+            input.value = '';
+            saveAndRender();
+        }
+
+        window.toggleTaskTimer = function(id) {
+            const task = window.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            // If another task was running, stop it
+            if (activeTaskId && activeTaskId !== id) {
+                clearInterval(activeTimerInterval);
+                activeTimerInterval = null;
+            }
+
+            // Toggle pause if clicking the active running task
+            if (activeTaskId === id) {
+                clearInterval(activeTimerInterval);
+                activeTimerInterval = null;
+                activeTaskId = null;
+                saveAndRender();
+                return;
+            }
+
+            // Start countdown timer for selected task
+            activeTaskId = id;
+            if (task.status === 'not-started') task.status = 'in-progress';
+
+            activeTimerInterval = setInterval(() => {
+                if (task.timeLeft > 0) {
+                    task.timeLeft--;
+                    const display = document.getElementById(`timer-display-${task.id}`);
+                    if (display) display.textContent = formatTime(task.timeLeft);
+                } else {
+                    clearInterval(activeTimerInterval);
+                    activeTimerInterval = null;
+                    activeTaskId = null;
+                    task.status = 'done';
+                    alert(`🎉 ToDoozie complete for "${task.text}"! Take a break.`);
+                    saveAndRender();
+                }
+            }, 1000);
+
+            saveAndRender();
+        }
+
+        window.resetTaskTimer = function(id) {
+            if (activeTaskId === id) {
+                clearInterval(activeTimerInterval);
+                activeTimerInterval = null;
+                activeTaskId = null;
+            }
+            const task = window.tasks.find(t => t.id === id);
+            if (task) {
+                task.timeLeft = 25 * 60;
+            }
+            saveAndRender();
+        }
+
+        window.cycleStatus = function(id) {
+            const task = window.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            if (task.status === 'not-started') task.status = 'in-progress';
+            else if (task.status === 'in-progress') task.status = 'done';
+            else task.status = 'not-started';
+
+            saveAndRender();
+        }
+
+        window.deleteTask = function(id) {
+            if (activeTaskId === id) {
+                clearInterval(activeTimerInterval);
+                activeTimerInterval = null;
+                activeTaskId = null;
+            }
+            window.tasks = window.tasks.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        document.getElementById('new-task-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.addTask();
+        });
+
+        renderTasks();
+    </script>
+</body>
+</html>
