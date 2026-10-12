@@ -1,4 +1,4 @@
-# ⚡ FocusFlow AI — In-Browser Smart Pomodoro Assistant
+# ⚡ FocusFlow AI — In-Browser Smart ToDoozie Assistant
 
 > *A privacy-first, serverless productivity tool powered by client-side WebGPU AI and procedural Web Audio.*
 
@@ -15,14 +15,14 @@ For a long time, I wanted to explore a simple question:
 
 Most productivity and AI tools rely on server-side APIs, requiring users to log in, supply API keys, or deal with server latency and data privacy concerns.
 
-**FocusFlow AI** is my answer to that challenge. It combines a classic **Pomodoro focus timer**, an **in-browser LLM** (via `@huggingface/transformers` and ONNX runtime), a **procedural Web Audio sound engine**, and **local persistent state**—all packed into a zero-backend static Web app.
+**FocusFlow AI** is my answer to that challenge. It combines a classic **ToDoozie focus timer**, an **in-browser LLM** (via `@huggingface/transformers` and ONNX runtime), a **procedural Web Audio sound engine**, and **local persistent state**—all packed into a zero-backend static Web app.
 
 ---
 
 ## ✨ Features
 
-- ⏱️ **Pomodoro Focus Engine:** Customizable Work/Break intervals with simple control toggles.
-- 🤖 **In-Browser AI Task Breakdown:** Uses **Gemma-3 270M (ONNX)** running locally to decompose major goals into actionable, 25-minute Pomodoro steps.
+- ⏱️ **ToDoozie Focus Engine:** Customizable Work/Break intervals with simple control toggles.
+- 🤖 **In-Browser AI Task Breakdown:** Uses **Gemma-3 270M (ONNX)** running locally to decompose major goals into actionable, 25-minute ToDoozie steps.
 - 🎵 **Procedural AI Soundscapes:** Real-time, algorithmic ambient audio generated entirely via the Web Audio API (no external MP3 downloads required). Choose between:
   - 🎷 **Smooth Jazz:** Mellow chord progressions with warm triangle waves.
   - ⚡ **Electric Energy:** Punchy, fast-paced synth loops to energize rapid sprints.
