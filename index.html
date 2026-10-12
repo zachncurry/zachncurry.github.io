@@ -107,6 +107,40 @@
             background-color: var(--border);
         }
 
+        /* Music Generator Control Panel */
+        .music-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background-color: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--border);
+            padding: 14px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .music-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        select {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        select:focus {
+            border-color: var(--accent);
+        }
+
         /* Tasks Section */
         .task-input-group {
             display: flex;
@@ -172,7 +206,7 @@
             gap: 8px;
         }
 
-        /* Status Badges / Selectors */
+        /* Status Badges */
         .status-badge {
             font-size: 0.75rem;
             padding: 4px 8px;
@@ -197,7 +231,6 @@
             gap: 4px;
         }
 
-        /* AI Status Bar */
         #ai-status {
             background-color: rgba(99, 102, 241, 0.1);
             border: 1px solid rgba(99, 102, 241, 0.3);
@@ -218,7 +251,7 @@
             <p>ToDoozie Focus Timer & In-Browser AI Task Breakdown</p>
         </header>
 
-        <!-- ToDoozie Timer Card -->
+        <!-- ToDoozie Timer Card with Ambient Music Generator -->
         <div class="card" style="text-align: center;">
             <div id="timer-mode" style="text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; color: var(--text-secondary);">Work Session</div>
             <div class="timer-display" id="timer">25:00</div>
@@ -226,6 +259,19 @@
                 <button id="start-btn" onclick="toggleTimer()">Start</button>
                 <button class="secondary" onclick="resetTimer()">Reset</button>
                 <button class="secondary" onclick="switchMode()">Switch Mode</button>
+            </div>
+
+            <!-- AI Ambient Music Generator Panel -->
+            <div class="music-panel">
+                <div style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc; text-align: left;">🎵 AI Procedural Ambient Soundscape</div>
+                <div class="music-controls-row">
+                    <select id="music-style-select" onchange="changeMusicStyle()">
+                        <option value="jazz">🎷 Smooth Jazz (Mellow Chords)</option>
+                        <option value="electric">⚡ Electric Energy (Pulsing Synth)</option>
+                        <option value="focus">🧠 Extreme Focus (Deep Ambient Drone)</option>
+                    </select>
+                    <button id="music-toggle-btn" class="secondary" onclick="toggleMusic()">Play Music</button>
+                </div>
             </div>
         </div>
 
@@ -239,13 +285,11 @@
                 <input type="text" id="new-task-input" placeholder="Enter a major task (e.g., Build landing page)...">
                 <button onclick="addTask()">Add Task</button>
             </div>
-            <ul class="task-list" id="task-list">
-                <!-- Dynamic tasks appear here -->
-            </ul>
+            <ul class="task-list" id="task-list"></ul>
         </div>
     </div>
 
-    <!-- Transformers.js Script Module via CDN -->
+    <!-- Transformers.js Script Module -->
     <script type="module">
         import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2';
 
@@ -284,7 +328,6 @@
             updateStatus(`AI is breaking down: "${task.text}"...`);
 
             let subtasks = [];
-
             try {
                 if (generator) {
                     const prompt = `Break down this task into 3 short actionable 25-minute ToDoozie steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
@@ -307,11 +350,7 @@
                 }
             } catch (e) {
                 console.error("Inference error:", e);
-                subtasks = [
-                    `Define scope and initial setup`,
-                    `Deep work sprint session`,
-                    `Final cleanup and review`
-                ];
+                subtasks = [`Define scope and initial setup`, `Deep work sprint session`, `Final cleanup and review`];
             }
 
             task.subtasks = subtasks;
@@ -320,8 +359,110 @@
         }
     </script>
 
-    <!-- ToDoozie & App State Logic -->
+    <!-- Procedural Web Audio Music Engine & App Logic -->
     <script>
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let musicTimer = null;
+        let currentStyle = 'jazz';
+
+        // Frequencies for scales (Hz)
+        const scales = {
+            jazz: [220.00, 261.63, 293.66, 329.63, 392.00, 440.00], // Smooth jazz pentatonic/minor 7th vibes
+            electric: [146.83, 196.00, 220.00, 293.66, 349.23, 392.00], // Punchy electric synth arpeggios
+            focus: [130.81, 196.00, 261.63, 329.63] // Deep calm ambient drone tones
+        };
+
+        function toggleMusic() {
+            const btn = document.getElementById('music-toggle-btn');
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                btn.textContent = "Stop Music";
+                btn.style.borderColor = "var(--success)";
+                btn.style.color = "var(--success)";
+                startProceduralMusic();
+            } else {
+                btn.textContent = "Play Music";
+                btn.style.borderColor = "var(--border)";
+                btn.style.color = "var(--text-primary)";
+                stopProceduralMusic();
+            }
+        }
+
+        function changeMusicStyle() {
+            currentStyle = document.getElementById('music-style-select').value;
+        }
+
+        function playTone(freq, type = 'sine', duration = 2) {
+            if (!audioCtx || !isMusicPlaying) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            // Smooth envelope to avoid clicks
+            gain.gain.setValueAtTime(0, audioCtx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.08, audioCtx.currentTime + 0.5);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function startProceduralMusic() {
+            stopProceduralMusic();
+
+            const playLoop = () => {
+                if (!isMusicPlaying) return;
+
+                const notes = scales[currentStyle];
+                const note = notes[Math.floor(Math.random() * notes.length)];
+                
+                let waveType = 'sine';
+                let noteDuration = 3;
+
+                if (currentStyle === 'electric') {
+                    waveType = 'square';
+                    noteDuration = 0.8;
+                } else if (currentStyle === 'jazz') {
+                    waveType = 'triangle';
+                    noteDuration = 2.5;
+                } else if (currentStyle === 'focus') {
+                    waveType = 'sine';
+                    noteDuration = 4;
+                }
+
+                playTone(note, waveType, noteDuration);
+
+                // Schedule next note depending on style pacing
+                const interval = currentStyle === 'electric' ? 600 : (currentStyle === 'jazz' ? 1800 : 3000);
+                musicTimer = setTimeout(playLoop, interval);
+            };
+
+            playLoop();
+        }
+
+        function stopProceduralMusic() {
+            if (musicTimer) {
+                clearTimeout(musicTimer);
+                musicTimer = null;
+            }
+        }
+
+        // ToDoozie & App State Logic
         let timeLeft = 25 * 60;
         let timerId = null;
         let isRunning = false;
@@ -331,7 +472,6 @@
         const startBtn = document.getElementById('start-btn');
         const timerMode = document.getElementById('timer-mode');
 
-        // Task State & LocalStorage
         let tasks = JSON.parse(localStorage.getItem('focusflow_tasks')) || [];
 
         function saveAndRender() {
@@ -351,9 +491,6 @@
             tasks.forEach(task => {
                 const li = document.createElement('li');
                 li.className = 'task-item';
-
-                // Status configuration mapping
-                const statuses = ['not-started', 'in-progress', 'done'];
                 const statusLabels = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'done': 'Done' };
 
                 li.innerHTML = `
@@ -380,14 +517,12 @@
             const text = input.value.trim();
             if (!text) return;
 
-            const newTask = {
-                id: Date.now(), // unique timestamp ID
+            tasks.push({
+                id: Date.now(),
                 text: text,
                 status: 'not-started',
                 subtasks: []
-            };
-
-            tasks.push(newTask);
+            });
             input.value = '';
             saveAndRender();
         }
@@ -408,7 +543,6 @@
             saveAndRender();
         }
 
-        // Timer Logic
         function updateTimerDisplay() {
             const minutes = Math.floor(timeLeft / 60);
             const seconds = timeLeft % 60;
@@ -459,7 +593,6 @@
             if (e.key === 'Enter') addTask();
         });
 
-        // Initial paint on load
         updateTimerDisplay();
         renderTasks();
     </script>
