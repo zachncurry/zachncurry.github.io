@@ -288,7 +288,7 @@
         </div>
     </div>
 
-    <!-- Transformers.js Script Module -->
+    <!-- Transformers.js Script Module with Error Resilience -->
     <script type="module">
         import { pipeline } from 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.0.2';
 
@@ -306,4 +306,334 @@
                 generator = await pipeline('text-generation', 'onnx-community/gemma-3-270m-it-ONNX', {
                     device: 'webgpu'
                 });
-                updateStatus("✨ Browser AI Ready
+                updateStatus("✨ Browser AI Ready! Click '🤖 AI Breakdown' on any task.");
+                setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+            } catch (err) {
+                console.warn("WebGPU initialization note, trying WASM fallback...", err);
+                try {
+                    generator = await pipeline('text-generation', 'onnx-community/gemma-3-270m-it-ONNX', {
+                        device: 'wasm'
+                    });
+                    updateStatus("✨ Browser AI Ready (WASM Mode)! Click '🤖 AI Breakdown'.");
+                    setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+                } catch (fallbackErr) {
+                    console.error("AI Model load failed entirely:", fallbackErr);
+                    updateStatus("⚠️ AI running in smart local fallback mode.");
+                    setTimeout(() => { statusEl.style.display = 'none'; }, 4000);
+                }
+            }
+        }
+
+        initAI();
+
+        window.breakdownTaskWithAI = async function(taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+
+            const btn = document.getElementById(`btn-${taskId}`);
+            btn.disabled = true;
+            btn.innerText = "Thinking...";
+            updateStatus(`AI is breaking down: "${task.text}"...`);
+
+            let subtasks = [];
+            try {
+                if (generator) {
+                    const prompt = `Break down this task into 3 short actionable 25-minute ToDoozie steps. Output only a list starting with hyphens:\nTask: ${task.text}\nSteps:\n-`;
+                    const output = await generator(prompt, { max_new_tokens: 80, temperature: 0.3 });
+                    const generatedText = output[0].generated_text;
+                    
+                    subtasks = generatedText
+                        .split('\n')
+                        .filter(line => line.trim().startsWith('-') || line.trim().startsWith('*'))
+                        .map(line => line.replace(/^[-*]\s*/, '').trim())
+                        .slice(0, 3);
+                }
+                
+                if (subtasks.length === 0) {
+                    subtasks = [
+                        `Research and outline requirements for ${task.text}`,
+                        `Execute core implementation block (25 mins)`,
+                        `Review, test, and finalize deliverables`
+                    ];
+                }
+            } catch (e) {
+                console.error("Inference error:", e);
+                subtasks = [`Define scope and initial setup`, `Deep work sprint session`, `Final cleanup and review`];
+            }
+
+            task.subtasks = subtasks;
+            saveAndRender();
+            statusEl.style.display = 'none';
+        }
+    </script>
+
+    <!-- Continuous Ambient Drone Sound Engine & App Logic -->
+    <script>
+        let audioCtx = null;
+        let isMusicPlaying = false;
+        let activeOscillators = [];
+        let masterGainNode = null;
+        let droneInterval = null;
+        let currentStyle = 'lofi';
+
+        const chordProgressions = {
+            lofi: [
+                [220.00, 261.63, 329.63, 392.00], // Am9
+                [174.61, 220.00, 261.63, 329.63], // Fmaj7
+                [130.81, 164.81, 196.00, 246.94], // Cmaj7
+                [196.00, 246.94, 293.66, 349.23]  // G6
+            ],
+            synthwave: [
+                [146.83, 220.00, 293.66, 440.00], // Dm pad
+                [123.47, 185.00, 246.94, 370.00], // Bm pad
+                [110.00, 164.81, 220.00, 329.63], // Am pad
+                [130.81, 196.00, 261.63, 392.00]  // C pad
+            ],
+            ambient: [
+                [103.83, 155.56, 207.65, 311.13], // Ab drone
+                [116.54, 174.61, 233.08, 349.23], // Bb drone
+                [92.50, 138.59, 185.00, 277.18]   // F# drone
+            ]
+        };
+
+        async function toggleMusic() {
+            const btn = document.getElementById('music-toggle-btn');
+            
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+
+            if (audioCtx.state === 'suspended') {
+                await audioCtx.resume();
+            }
+
+            isMusicPlaying = !isMusicPlaying;
+            if (isMusicPlaying) {
+                btn.textContent = "Stop Soundscape";
+                btn.style.borderColor = "var(--success)";
+                btn.style.color = "var(--success)";
+                startContinuousDrone();
+            } else {
+                btn.textContent = "Play Soundscape";
+                btn.style.borderColor = "var(--border)";
+                btn.style.color = "var(--text-primary)";
+                stopContinuousDrone();
+            }
+        }
+
+        function changeMusicStyle() {
+            currentStyle = document.getElementById('music-style-select').value;
+            if (isMusicPlaying) {
+                transitionToNextChord(0);
+            }
+        }
+
+        function startContinuousDrone() {
+            stopContinuousDrone();
+            if (!audioCtx) return;
+
+            const now = audioCtx.currentTime;
+
+            const filter = audioCtx.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(750, now);
+
+            masterGainNode = audioCtx.createGain();
+            masterGainNode.gain.setValueAtTime(0, now);
+            masterGainNode.gain.linearRampToValueAtTime(0.10, now + 2.0);
+
+            filter.connect(masterGainNode);
+            masterGainNode.connect(audioCtx.destination);
+
+            const initialChord = chordProgressions[currentStyle][0];
+            activeOscillators = initialChord.map(freq => {
+                const osc = audioCtx.createOscillator();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(freq, now);
+                osc.connect(filter);
+                osc.start(now);
+                return osc;
+            });
+
+            let chordIdx = 0;
+            droneInterval = setInterval(() => {
+                if (!isMusicPlaying) return;
+                chordIdx = (chordIdx + 1) % chordProgressions[currentStyle].length;
+                transitionToNextChord(chordIdx);
+            }, 7000);
+        }
+
+        function transitionToNextChord(index) {
+            if (!activeOscillators.length || !audioCtx) return;
+            const targetChord = chordProgressions[currentStyle][index];
+            const now = audioCtx.currentTime;
+
+            activeOscillators.forEach((osc, idx) => {
+                if (targetChord[idx]) {
+                    osc.frequency.linearRampToValueAtTime(targetChord[idx], now + 3.0);
+                }
+            });
+        }
+
+        function stopContinuousDrone() {
+            if (droneInterval) {
+                clearInterval(droneInterval);
+                droneInterval = null;
+            }
+
+            if (masterGainNode && audioCtx) {
+                const now = audioCtx.currentTime;
+                try {
+                    masterGainNode.gain.linearRampToValueAtTime(0.0001, now + 1.5);
+                } catch(e) {}
+                setTimeout(() => {
+                    activeOscillators.forEach(osc => {
+                        try { osc.stop(); } catch(e){}
+                    });
+                    activeOscillators = [];
+                }, 1600);
+            } else {
+                activeOscillators.forEach(osc => {
+                    try { osc.stop(); } catch(e){}
+                });
+                activeOscillators = [];
+            }
+        }
+
+        // ToDoozie & App State Logic
+        let timeLeft = 25 * 60;
+        let timerId = null;
+        let isRunning = false;
+        let isWorkSession = true;
+
+        const timerDisplay = document.getElementById('timer');
+        const startBtn = document.getElementById('start-btn');
+        const timerMode = document.getElementById('timer-mode');
+
+        // Global tasks array shared with window scope
+        window.tasks = JSON.parse(localStorage.getItem('focusflow_tasks')) || [];
+
+        function saveAndRender() {
+            localStorage.setItem('focusflow_tasks', JSON.stringify(window.tasks));
+            renderTasks();
+        }
+
+        function renderTasks() {
+            const list = document.getElementById('task-list');
+            list.innerHTML = '';
+
+            if (window.tasks.length === 0) {
+                list.innerHTML = `<li style="text-align: center; color: var(--text-secondary); padding: 10px;">No tasks added yet. Add one above!</li>`;
+                return;
+            }
+
+            window.tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                const statusLabels = { 'not-started': 'Not Started', 'in-progress': 'In Progress', 'done': 'Done' };
+
+                li.innerHTML = `
+                    <div class="task-main">
+                        <div class="task-info">
+                            <span class="task-title" style="${task.status === 'done' ? 'text-decoration: line-through; color: var(--text-secondary);' : ''}">${task.text}</span>
+                        </div>
+                        <div class="task-actions">
+                            <span class="status-badge status-${task.status}" onclick="cycleStatus(${task.id})" title="Click to change status">${statusLabels[task.status]}</span>
+                            <button class="secondary" id="btn-${task.id}" onclick="breakdownTaskWithAI(${task.id})">🤖 AI Breakdown</button>
+                            <button class="secondary" onclick="deleteTask(${task.id})" style="color: var(--danger); border-color: rgba(239, 68, 68, 0.3);">×</button>
+                        </div>
+                    </div>
+                    <ul class="subtasks" id="subtasks-${task.id}">
+                        ${(task.subtasks || []).map(st => `<li>${st}</li>`).join('')}
+                    </ul>
+                `;
+                list.appendChild(li);
+            });
+        }
+
+        window.addTask = function() {
+            const input = document.getElementById('new-task-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            window.tasks.push({
+                id: Date.now(),
+                text: text,
+                status: 'not-started',
+                subtasks: []
+            });
+            input.value = '';
+            saveAndRender();
+        }
+
+        window.cycleStatus = function(id) {
+            const task = window.tasks.find(t => t.id === id);
+            if (!task) return;
+
+            if (task.status === 'not-started') task.status = 'in-progress';
+            else if (task.status === 'in-progress') task.status = 'done';
+            else task.status = 'not-started';
+
+            saveAndRender();
+        }
+
+        window.deleteTask = function(id) {
+            window.tasks = window.tasks.filter(t => t.id !== id);
+            saveAndRender();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        window.toggleTimer = function() {
+            if (isRunning) {
+                clearInterval(timerId);
+                startBtn.textContent = "Start";
+                isRunning = false;
+            } else {
+                isRunning = true;
+                startBtn.textContent = "Pause";
+                timerId = setInterval(() => {
+                    if (timeLeft > 0) {
+                        timeLeft--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerId);
+                        alert(isWorkSession ? "ToDoozie session complete! Take a break." : "Break over! Time to focus.");
+                        switchMode();
+                    }
+                }, 1000);
+            }
+        }
+
+        window.resetTimer = function() {
+            clearInterval(timerId);
+            isRunning = false;
+            startBtn.textContent = "Start";
+            timeLeft = isWorkSession ? 25 * 60 : 5 * 60;
+            updateTimerDisplay();
+        }
+
+        window.switchMode = function() {
+            clearInterval(timerId);
+            isRunning = false;
+            startBtn.textContent = "Start";
+            isWorkSession = !isWorkSession;
+            timeLeft = isWorkSession ? 25 * 60 : 5 * 60;
+            timerMode.textContent = isWorkSession ? "Work Session" : "Break Time";
+            timerDisplay.style.color = isWorkSession ? "var(--text-primary)" : "#34d399";
+            updateTimerDisplay();
+        }
+
+        document.getElementById('new-task-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') window.addTask();
+        });
+
+        updateTimerDisplay();
+        renderTasks();
+    </script>
+</body>
+</html>
