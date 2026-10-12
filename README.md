@@ -1,6 +1,6 @@
-# ⚡ FocusFlow AI: In-Browser Smart ToDoozie Assistant
+# ⚡ FocusFlow AI — In-Browser Smart Task & Focus Assistant
 
-> *A privacy-first, serverless productivity tool powered by client-side WebGPU AI and procedural Web Audio.*
+> *A privacy-first productivity dashboard with task-bound ToDoozie timers, local WebGPU AI breakdowns, and an integrated Spotify player.*
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Tech Stack](https://img.shields.io/badge/tech-HTML5%20%7C%20CSS3%20%7C%20JS%20%7C%20Transformers.js-orange)
@@ -8,76 +8,65 @@
 
 ---
 
-## 💡 The Vision: Lightweight, Frictionless AI & Soundscapes
+## 💡 The Vision: Lightweight, Frictionless AI & Focus Tools
 
-For a long time, I wanted to explore a simple question:  
-**"Can we build useful, modern AI tools that run 100% inside the user's browser without complex backends, heavy cloud infrastructure, or expensive API keys?"**
+**FocusFlow AI** explores a simple question:  
+**"Can we build useful, modern productivity tools with local AI that run 100% inside the browser without backend servers, subscription costs, or exposed API keys?"**
 
-Most productivity and AI tools rely on server-side APIs, requiring users to log in, supply API keys, or deal with server latency and data privacy concerns.
-
-**FocusFlow AI** is my answer to that challenge. It combines a classic **ToDoozie focus timer**, an **in-browser LLM** (via `@huggingface/transformers` and ONNX runtime), a **procedural Web Audio sound engine**, and **local persistent state**—all packed into a zero-backend static Web app.
+Most AI utilities rely on heavy cloud APIs or server infrastructure. **FocusFlow AI** shifts everything to the client side. By pairing **Task-Bound ToDoozie Timers**, an **in-browser LLM** (`@huggingface/transformers`), **LocalStorage persistence**, and an **embedded Spotify Focus widget**, it offers a complete focus workspace hosted directly on GitHub Pages for $0.
 
 ---
 
-## ✨ Features
+## ✨ Key Features
 
-- ⏱️ **ToDoozie Focus Engine:** Customizable Work/Break intervals with simple control toggles.
-- 🤖 **In-Browser AI Task Breakdown:** Uses **Gemma-3 270M (ONNX)** running locally to decompose major goals into actionable, 25-minute ToDoozie steps.
-- 🎵 **Procedural AI Soundscapes:** Real-time, algorithmic ambient audio generated entirely via the Web Audio API (no external MP3 downloads required). Choose between:
-  - 🎷 **Smooth Jazz:** Mellow chord progressions with warm triangle waves.
-  - ⚡ **Electric Energy:** Punchy, fast-paced synth loops to energize rapid sprints.
-  - 🧠 **Extreme Focus:** Deep ambient drones designed for distraction-free deep work.
-- 📊 **Dynamic Task Status Management:** Cycle tasks between **Not Started**, **In Progress**, and **Done** with visual badges.
-- 💾 **LocalStorage Persistence:** Saves your task list, subtasks, and progress automatically across browser sessions.
-- 🔒 **100% Local & Private:** Your task list, prompts, and audio generation never leave your device. Zero server calls, zero telemetry.
-- ⚡ **WebGPU / WASM Accelerated:** High-performance local inference directly through your browser graphics card.
-- 💸 **$0 Cost to Host:** Single-file static architecture natively hosted on GitHub Pages.
+- ⏱️ **Task-Associated ToDoozie Timers:** Each task features its own dedicated 25-minute countdown timer. Starting a timer automatically shifts task status to *In Progress* and auto-completes it upon session finish.
+- 🤖 **In-Browser AI Task Breakdown:** Uses **Gemma-3 270M (ONNX)** running locally to decompose complex, daunting tasks into 3 actionable 25-minute steps.
+- 🎵 **Floating Spotify Focus Widget:** Fixed in the upper-right corner for quick access to curated lo-fi and focus playlists while working.
+- 📊 **Three-State Task Lifecycle:** Track progress across **Not Started**, **In Progress**, and **Done** with clickable status badges.
+- 💾 **LocalStorage Persistence:** All tasks, active subtasks, and remaining timer states persist automatically across browser refreshes.
+- 🔒 **100% Local & Private:** Prompts and task data never leave your browser. Zero backend telemetry, zero API key requirements.
+- ⚡ **WebGPU / WASM Accelerated:** High-performance local AI execution powered by your browser's graphics processing or WASM fallback.
+- 💸 **$0 Cost to Host:** Single-file static architecture native to GitHub Pages.
 
 ---
 
 ## 🛠️ How It Works Under the Hood
-<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/4db65002-9365-4e75-8318-9620461d1994" />
-1. **No Backend Required:** The app is written in plain HTML, CSS, and modern JavaScript.
-2. **Model Caching:** On first load, the lightweight quantized model (~270M parameters) is cached locally in the browser (`IndexedDB`), allowing instant execution on subsequent visits.
-3. **Zero Audio File Overhead:** Instead of streaming heavy MP3 files, ambient soundscapes are synthesized mathematically in real time using the browser's native `AudioContext` oscillators and gain nodes.
-4. **Hardware Acceleration:** Uses **WebGPU** when available, automatically falling back to CPU WebAssembly (WASM).
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/961abba2-7cf1-4043-8854-8c4ecf2bc168" />
+
+
+1. **Client-Side Architecture:** The entire app runs out of a single `index.html` file using standard web APIs and CDN-loaded ES modules.
+2. **Model Caching:** On first execution, the quantized ~270M parameter model is cached locally in `IndexedDB`, allowing subsequent task breakdowns to generate quickly.
+3. **Smart State Management:** Starting a focus timer on one task automatically pauses any other running timer to keep you focused on a single priority at a time.
 
 ---
 
 ## 🚀 Live Demo & Quickstart
 
 ### 1. View Live
-Try the live demo on GitHub Pages:  
+Try the live app on GitHub Pages:  
 👉 **`https://<your-username>.github.io/<your-repo-name>/`**
 
 ### 2. Run Locally
-No `npm install` or node server setup needed!
+No `npm install`, Node.js server, or build step required!
 
 1. Clone the repository:
    ```bash
    git clone [https://github.com/](https://github.com/)<your-username>/<your-repo-name>.git
 
+
 ## 📊 Tech Stack
-Frontend: Vanilla HTML5, CSS3, JavaScript (ES6 Modules)
-
-AI Runtime: @huggingface/transformers v3
-
+Frontend: HTML5, CSS3 (CSS Variables & Flexbox), Vanilla JavaScript (ES6 Modules)
+AI Engine: @huggingface/transformers v3
 Model: onnx-community/gemma-3-270m-it-ONNX
-
-Audio Engine: Web Audio API (Synthesized Oscillators)
-
-Persistence: HTML5 localStorage API
-
+Integrations: Spotify Embed iFrame API
+Persistence: HTML5 localStorage & IndexedDB
 Hosting: GitHub Pages
 
 ## 🔮 Future Roadmap
-[ ] Custom soundscape tempo and frequency controls
-[ ] Export task lists & session summaries to Markdown
-[ ] Customizable model selection (e.g., Qwen / SmolLM variants)
-[ ] Offline PWA (Progressive Web App) manifest and service worker integration
+[ ] Custom ToDoozie duration sliders per task
+[ ] Drag-and-drop task reordering
+[ ] Export completed tasks & session logs to Markdown/CSV
+[ ] Custom Spotify playlist URL input in widget settings
 
 ## 🤝 Contributing
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
-
-## 📄 License
-Distributed under the MIT License. See LICENSE for more information.
+Contributions, feature requests, and bug reports are welcome! Feel free to open an issue or submit a pull request.
