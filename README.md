@@ -1,4 +1,4 @@
-# ⚡ FocusFlow AI — In-Browser Smart Task & Focus Assistant
+# ⚡ FocusFlow AI: In-Browser Smart Task & Focus Assistant
 
 > *A privacy-first productivity dashboard with task-bound ToDoozie timers, local WebGPU AI breakdowns, and an integrated Spotify player.*
 
